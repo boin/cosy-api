@@ -11,7 +11,7 @@ services:
       - PYTHONPATH=./:./third_party/Matcha-TTS:./third_party/AcademiCodec
     volumes:
       - /data/ttd/cosy-voice/:/opt/CosyVoice/data  # data_root
-      - /data/ttd/cosy-voice/.cache:/opt/CosyVoice/.cache # hs/ms cache dir
+      - /data/ttd/cosy-voice/.cache:/root/.cache # hs/ms cache dir
     working_dir: /opt/CosyVoice
     shm_size: 32G
     stdin_open: true
