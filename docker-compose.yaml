@@ -1,0 +1,60 @@
+services:
+  cosy-base:
+    container_name: 'cosy-api-1'
+    build: .
+    image: cosy-api:latest # please change the image name and tag base your environment. If the tag contains the word 'elite', such as "latest-elite", it indicates that the image does not include the necessary models such as GPT-SoVITS, UVR5, Damo ASR, etc. You will need to download them yourself and map them into the container.
+    environment:
+      - is_half=True
+      - is_share=False
+      - LC_ALL=en_US.UTF-8
+      - PYTHONIOENCODING=UTF-8
+      - PYTHONPATH=./:./third_party/Matcha-TTS:./third_party/AcademiCodec
+    volumes:
+      - /data/ttd/cosy-voice/:/opt/CosyVoice/data  # data_root
+      - /data/ttd/cosy-voice/.cache:/opt/CosyVoice/.cache # hs/ms cache dir
+    working_dir: /opt/CosyVoice
+    shm_size: 32G
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    extra_hosts:
+      - "ttd-server:host-gateway"
+    ports:
+      - "360:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ "0" ]
+              capabilities: [ gpu ]
+
+  cosy-api-2:
+    container_name: 'cosy-api-2'
+    profiles:
+      - production
+    extends: cosy-base
+    ports: !override
+      - "361:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ "2" ]
+              capabilities: [ gpu ]
+
+  cosy-api-3:
+    container_name: 'cosy-api-3'
+    profiles:
+      - production
+    extends: cosy-base
+    ports: !override
+      - "362:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ "1" ]
+              capabilities: [ gpu ]
