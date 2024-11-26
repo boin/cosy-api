@@ -31,6 +31,7 @@ from fastapi.responses import StreamingResponse
 from cosyvoice.cli.cosyvoice import CosyVoice
 from cosyvoice.utils.file_utils import load_wav
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
