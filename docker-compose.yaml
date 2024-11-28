@@ -36,7 +36,7 @@ services:
     extends: cosy-base
     ports: !override
       - "361:8000"
-    deploy:
+    deploy: !override
       resources:
         reservations:
           devices:
@@ -51,7 +51,7 @@ services:
     extends: cosy-base
     ports: !override
       - "362:8000"
-    deploy:
+    deploy: !override
       resources:
         reservations:
           devices:
