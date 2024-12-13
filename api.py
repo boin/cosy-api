@@ -69,7 +69,7 @@ def normalize_sound(audio, sr=22050):
     # Measure loudness
     loudness = meter.integrated_loudness(audio)
     # Normalize to -25 LUFS
-    normalized_audio = pyln.normalize.loudness(audio, loudness, -25.0)
+    normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
     return normalized_audio
 
 
