@@ -31,8 +31,6 @@ services:
 
   cosy-api-2:
     container_name: 'cosy-api-2'
-    profiles:
-      - production
     extends: cosy-base
     ports: !override
       - "361:8000"
@@ -46,8 +44,6 @@ services:
 
   cosy-api-3:
     container_name: 'cosy-api-3'
-    profiles:
-      - production
     extends: cosy-base
     ports: !override
       - "362:8000"
