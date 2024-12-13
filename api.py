@@ -64,11 +64,10 @@ def normalize_sound(audio, sr=22050):
     Returns:
         numpy.ndarray: The loudness-normalized audio signal (float32).
     """
-    # Create a loudness meter
     meter = pyln.Meter(sr)  # ITU-R BS.1770 meter
-    # Measure loudness
     loudness = meter.integrated_loudness(audio)
-    # Normalize to -25 LUFS
+    logging.info(f"Original loudness: {loudness:.2f} LUFS, normalize to target: -23 LUFS")
+    # Normalize to -23 LUFS
     normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
     return normalized_audio
 
@@ -81,16 +80,11 @@ def generate_data(model_output):
     Returns:
         io.BytesIO: A memory buffer containing the WAV audio file.
     """
-    # Combine the TTS audio chunks
-    tts_audio = b""
+    tts_speeches = []
     for i in model_output:
-        tts_audio += (i["tts_speech"].numpy() * (2**15)).astype(np.int16).tobytes()
-    # Convert byte stream to numpy array (int16)
-    audio_array = np.frombuffer(tts_audio, dtype=np.int16)
-    # Normalize the audio
-    # Convert to float32 (necessary for loudness normalization)
-    float_audio = audio_array.astype(np.float32) / (2**15)
-    normalized_audio = normalize_sound(float_audio, sr=22050)
+        tts_speeches.append(i["tts_speech"])
+    tts_audio = torch.concat(tts_speeches, dim=1).numpy().flatten()
+    normalized_audio = normalize_sound(tts_audio, sr=22050)
     # Convert back to int16
     int16_audio = (normalized_audio * (2**15)).astype(np.int16)
     # Write to WAV file in memory
@@ -103,19 +97,6 @@ def generate_data(model_output):
     # Reset buffer position
     buffer.seek(0)
     return buffer
-
-
-"""
-"rseed": 8343459,
-"voice_uuid": "旁白_dildo,好奇,惊讶_001_535848_不知过去了多长时间，我的眼前，忽然出现了一抹光亮。",
-"actor_uuid": "00291d13ba81803a546407fcfc34b365",
-"text": "很快，我们回到了村子里。唐雅兰向我告辞，回了自己的家。我和老八以及天机子，则回到了师父的居所。歇了一夜。"
-curl -X POST "https://8000.wodeip.org:8361/infer" \
-     -d "text='%E5%BE%88%E5%BF%AB%EF%BC%8C%E6%88%91%E4%BB%AC%E5%9B%9E%E5%88%B0%E4%BA%86%E6%9D%91%E5%AD%90%E9%87%8C%E3%80%82%E5%94%90%E9%9B%85%E5%85%B0%E5%90%91%E6%88%91%E5%91%8A%E8%BE%9E%EF%BC%8C%E5%9B%9E%E4%BA%86%E8%87%AA%E5%B7%B1%E7%9A%84%E5%AE%B6%E3%80%82%E6%88%91%E5%92%8C%E8%80%81%E5%85%AB%E4%BB%A5%E5%8F%8A%E5%A4%A9%E6%9C%BA%E5%AD%90%EF%BC%8C%E5%88%99%E5%9B%9E%E5%88%B0%E4%BA%86%E5%B8%88%E7%88%B6%E7%9A%84%E5%B1%85%E6%89%80%E3%80%82%E6%AD%87%E4%BA%86%E4%B8%80%E5%A4%9C%E3%80%82'" \
-     -d "voice_uuid=%E6%97%81%E7%99%BD_dildo,%E5%A5%BD%E5%A5%87,%E6%83%8A%E8%AE%B6_001_535848_%E4%B8%8D%E7%9F%A5%E8%BF%87%E5%8E%BB%E4%BA%86%E5%A4%9A%E9%95%BF%E6%97%B6%E9%97%B4%EF%BC%8C%E6%88%91%E7%9A%84%E7%9C%BC%E5%89%8D%EF%BC%8C%E5%BF%BD%E7%84%B6%E5%87%BA%E7%8E%B0%E4%BA%86%E4%B8%80%E6%8A%B9%E5%85%89%E4%BA%AE%E3%80%82" \
-     -d "actor_uuid=df1b5ea67ae881bf5dd97b583e6e7d72" \
-     -d "rseed=834345"
-"""
 
 
 @app.post("/infer")
