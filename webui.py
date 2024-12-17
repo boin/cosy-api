@@ -167,11 +167,12 @@ def main():
                                       seed, stream, speed],
                               outputs=[audio_output])
         mode_checkbox_group.change(fn=change_instruction, inputs=[mode_checkbox_group], outputs=[instruction_text])
+        from tools.funasr import auto_asr
+        prompt_wav_upload.change(auto_asr, prompt_wav_upload, prompt_text)
+        prompt_wav_record.change(auto_asr, prompt_wav_record, prompt_text)
     demo.queue(max_size=4, default_concurrency_limit=2)
     demo.launch(server_name='0.0.0.0', server_port=args.port)
-    from tools.funasr import auto_asr
-    prompt_wav_upload.change(auto_asr, prompt_wav_upload, prompt_text)
-    prompt_wav_record.change(auto_asr, prompt_wav_record, prompt_text)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
