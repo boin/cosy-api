@@ -28,7 +28,7 @@ from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from cosyvoice.cli.cosyvoice import CosyVoice
+from cosyvoice.cli.cosyvoice import CosyVoice, CosyVoice2
 from cosyvoice.utils.file_utils import load_wav
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -64,12 +64,16 @@ def normalize_sound(audio, sr=22050):
     Returns:
         numpy.ndarray: The loudness-normalized audio signal (float32).
     """
-    meter = pyln.Meter(sr)  # ITU-R BS.1770 meter
-    loudness = meter.integrated_loudness(audio)
-    logging.info(f"Original loudness: {loudness:.2f} LUFS, normalize to target: -23 LUFS")
-    # Normalize to -23 LUFS
-    normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
-    return normalized_audio
+    try:
+        meter = pyln.Meter(sr)  # ITU-R BS.1770 meter
+        loudness = meter.integrated_loudness(audio)
+        logging.info(f"Original loudness: {loudness:.2f} LUFS, normalize to target: -23 LUFS")
+        # Normalize to -23 LUFS
+        normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
+        return normalized_audio
+    except Exception as e:
+        logging.exception(f"Failed to normalize audio {e}, return original audio")
+        return audio
 
 
 def generate_data(model_output):
@@ -128,12 +132,7 @@ async def inference(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument(
-        "--model_dir",
-        type=str,
-        default="iic/CosyVoice-300M-25Hz",
-        help="local path or modelscope repo id",
-    )
     args = parser.parse_args()
-    cosyvoice = CosyVoice(args.model_dir)
+    cosyvoice = CosyVoice('pretrained_models/CosyVoice-300M-25Hz', load_jit=True, load_onnx=False, load_trt=False)
+    #cosyvoice = CosyVoice2('pretrained_models/CosyVoice2-0.5B', load_jit=True, load_onnx=False, load_trt=False)
     uvicorn.run(app, host="0.0.0.0", port=args.port)
