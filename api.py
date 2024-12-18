@@ -133,6 +133,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
-    cosyvoice = CosyVoice('pretrained_models/CosyVoice-300M-25Hz', load_jit=True, load_onnx=False)
-    #cosyvoice = CosyVoice2('pretrained_models/CosyVoice2-0.5B', load_jit=True, load_onnx=False, load_trt=False)
+    cosyvoice = CosyVoice('data/pretrained_models/CosyVoice-300M-25Hz', load_jit=True, load_onnx=False)
+    #cosyvoice = CosyVoice2('data/pretrained_models/CosyVoice2-0.5B', load_jit=True, load_onnx=False, load_trt=False)
     uvicorn.run(app, host="0.0.0.0", port=args.port)
