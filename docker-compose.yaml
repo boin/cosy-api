@@ -39,7 +39,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: [ "2" ]
+              device_ids: [ "1" ]
               capabilities: [ gpu ]
 
   cosy-api-3:
@@ -52,5 +52,5 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: [ "1" ]
+              device_ids: [ "2" ]
               capabilities: [ gpu ]
