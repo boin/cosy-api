@@ -11,7 +11,7 @@ RUN pip3 install -U numpy==1.26.4 pyloudnorm
 
 COPY . /opt/CosyVoice
 WORKDIR /opt/CosyVoice
-
+RUN git submodule update --init --recursive
 #RUN mkdir -p logs
 #RUN echo '#!/bin/bash\npython3 -u webui_auto.py 2>&1 | stdbuf -oL -eL tee -i logs/auto.log &\n  python3 -u webui_train.py 2>&1 | stdbuf -oL -eL tee -i logs/train.log ' >> /opt/CosyVoice/service.sh
 #RUN chmod u+x /opt/CosyVoice/service.sh
