@@ -72,7 +72,7 @@ def normalize_sound(audio, sr=22050):
         normalized_audio = pyln.normalize.loudness(audio, loudness, -23.0)
         return normalized_audio
     except Exception as e:
-        logging.exception(f"Failed to normalize audio {e}, return original audio")
+        logging.warning(f"Failed to normalize audio {e}, return original audio")
         return audio
 
 
