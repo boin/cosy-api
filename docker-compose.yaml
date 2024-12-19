@@ -16,12 +16,7 @@ services:
         volume:
           nocopy: true
           subpath: cosy-voice
-      - type: volume # hs/ms cache dir
-        source: TTD-Data
-        target: /root/.cache
-        volume:
-          nocopy: true
-          subpath: cosy-voice/cache
+      # no need cache hs/ms cache dir
     working_dir: /opt/CosyVoice
     shm_size: 32G
     stdin_open: true

@@ -7,7 +7,7 @@ RUN locale-gen en_US en_US.UTF-8
 #mount requirements.txt for best cache result
 RUN --mount=type=bind,source=requirements.txt,target=/tmp/requirements.txt \
     pip3 install --no-cache-dir -r /tmp/requirements.txt
-RUN pip3 install -U numpy==1.26.4 pyloudnorm
+RUN pip3 install --no-cache-dir -U numpy==1.26.4 pyloudnorm
 
 COPY . /opt/CosyVoice
 WORKDIR /opt/CosyVoice
