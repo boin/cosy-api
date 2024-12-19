@@ -10,8 +10,18 @@ services:
       - PYTHONIOENCODING=UTF-8
       - PYTHONPATH=./:./third_party/Matcha-TTS:./third_party/AcademiCodec
     volumes:
-      - /data/ttd/cosy-voice/:/opt/CosyVoice/data  # data_root
-      - /data/ttd/cosy-voice/.cache:/root/.cache # hs/ms cache dir
+      - type: volume # data_root
+        source: TTD-Data
+        target: /opt/CosyVoice/data
+        volume:
+          nocopy: true
+          subpath: cosy-voice
+      - type: volume # hs/ms cache dir
+        source: TTD-Data
+        target: /root/.cache
+        volume:
+          nocopy: true
+          subpath: cosy-voice/cache
     working_dir: /opt/CosyVoice
     shm_size: 32G
     stdin_open: true
@@ -28,7 +38,6 @@ services:
             - driver: nvidia
               device_ids: [ "0" ]
               capabilities: [ gpu ]
-
   cosy-api-2:
     container_name: 'cosy-api-2'
     extends: cosy-base
@@ -41,7 +50,6 @@ services:
             - driver: nvidia
               device_ids: [ "1" ]
               capabilities: [ gpu ]
-
   cosy-api-3:
     container_name: 'cosy-api-3'
     extends: cosy-base
@@ -54,3 +62,6 @@ services:
             - driver: nvidia
               device_ids: [ "2" ]
               capabilities: [ gpu ]
+volumes:
+  TTD-Data:
+    external: true
