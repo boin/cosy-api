@@ -9,6 +9,11 @@ RUN --mount=type=bind,source=requirements.txt,target=/tmp/requirements.txt \
     pip3 install --no-cache-dir -r /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -U numpy==1.26.4 pyloudnorm
 
+ADD https://www.modelscope.cn/models/iic/CosyVoice-ttsfrd/resolve/master/ttsfrd_dependency-0.1-py3-none-any.whl /tmp/ttsfrd_dependency-0.1-py3-none-any.whl
+ADD https://www.modelscope.cn/models/iic/CosyVoice-ttsfrd/resolve/master/ttsfrd-0.4.2-cp310-cp310-linux_x86_64.whl /tmp/ttsfrd-0.4.2-cp310-cp310-linux_x86_64.whl
+RUN pip3 install --no-cache-dir /tmp/ttsfrd_dependency-0.1-py3-none-any.whl
+RUN pip3 install --no-cache-dir /tmp/ttsfrd-0.4.2-cp310-cp310-linux_x86_64.whl
+
 COPY . /opt/CosyVoice
 WORKDIR /opt/CosyVoice
 RUN git submodule update --init --recursive
