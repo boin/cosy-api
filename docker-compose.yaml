@@ -16,6 +16,12 @@ services:
         volume:
           nocopy: true
           subpath: cosy-voice
+      - type: volume # pretrained_models 被TTSfrd使用，必须映射
+        source: TTD-Data
+        target: /opt/CosyVoice/pretrained_models
+        volume:
+          nocopy: true
+          subpath: cosy-voice/pretrained_models
       # no need cache hs/ms cache dir
     working_dir: /opt/CosyVoice
     shm_size: 32G
