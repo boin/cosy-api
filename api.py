@@ -88,9 +88,9 @@ def generate_data(model_output):
     for i in model_output:
         tts_speeches.append(i["tts_speech"])
     tts_audio = torch.concat(tts_speeches, dim=1).numpy().flatten()
-    normalized_audio = normalize_sound(tts_audio, sr=22050)
+    #tts_audio = normalize_sound(tts_audio, sr=22050)
     # Convert back to int16
-    int16_audio = (normalized_audio * (2**15)).astype(np.int16)
+    int16_audio = (tts_audio * (2**15)).astype(np.int16)
     # Write to WAV file in memory
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as wav_file:
