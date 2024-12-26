@@ -55,7 +55,7 @@ def get_model_info(actor_uuid, voice_uuid) -> (bytes, str):
     return prompt_wav, voice_uuid.split("_")[-1]
 
 
-def normalize_sound(audio, sr=22050):
+def normalize_sound(audio, sr):
     """
     Normalize the loudness of an audio signal to -25 LUFS.
     Args:
@@ -88,7 +88,7 @@ def generate_data(model_output):
     for i in model_output:
         tts_speeches.append(i["tts_speech"])
     tts_audio = torch.concat(tts_speeches, dim=1).numpy().flatten()
-    #tts_audio = normalize_sound(tts_audio, sr=22050)
+    tts_audio = normalize_sound(tts_audio, sr=cosyvoice.sample_rate)
     # Convert back to int16
     int16_audio = (tts_audio * (2**15)).astype(np.int16)
     # Write to WAV file in memory
@@ -96,7 +96,7 @@ def generate_data(model_output):
     with wave.open(buffer, "wb") as wav_file:
         wav_file.setnchannels(1)  # Mono audio
         wav_file.setsampwidth(2)  # 16-bit audio
-        wav_file.setframerate(22050)  # 22.05 kHz sample rate
+        wav_file.setframerate(cosyvoice.sample_rate)  # 24000 kHz sample rate
         wav_file.writeframes(int16_audio.tobytes())
     # Reset buffer position
     buffer.seek(0)
