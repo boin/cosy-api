@@ -15,6 +15,7 @@ import argparse
 import io
 import logging
 import os
+import tempfile
 import random
 import sys
 import wave
@@ -24,7 +25,7 @@ import numpy as np
 import pyloudnorm as pyln
 import torch
 import uvicorn
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
@@ -127,6 +128,50 @@ async def inference(
         media_type="audio/wav",
         headers={"Content-Disposition": "attachment; filename=output.wav"},
     )
+
+
+@app.post("/zero_shot_infer")
+async def zero_shot(
+    text: str = Form(),
+    ref_file: UploadFile = File(...),
+    asr: str = Form(),
+    rseed: str = Form(),
+    speed: str = Form(),
+):
+    if rseed != "":
+        seed = int(rseed)
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    speed = float(speed)
+    
+    # 保存上传的文件到临时目录
+    
+    temp_dir = tempfile.mkdtemp()
+    temp_file_path = os.path.join(temp_dir, ref_file.filename)
+    
+    try:
+        # 保存上传的文件
+        contents = await ref_file.read()
+        with open(temp_file_path, 'wb') as f:
+            f.write(contents)
+        
+        # 处理音频文件
+        prompt_speech_16k = load_wav(temp_file_path, 16000)
+        model_output = cosyvoice.inference_zero_shot(text, asr, prompt_speech_16k, speed)
+        
+        return StreamingResponse(
+            generate_data(model_output),
+            media_type="audio/wav",
+            headers={"Content-Disposition": "attachment; filename=output.wav"},
+        )
+    finally:
+        # 清理临时文件
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+        if os.path.exists(temp_dir):
+            os.rmdir(temp_dir)
 
 
 if __name__ == "__main__":

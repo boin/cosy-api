@@ -28,8 +28,6 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
-    extra_hosts:
-      - "ttd-server:host-gateway"
     ports:
       - "360:8000"
     deploy:
