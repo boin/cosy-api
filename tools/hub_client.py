@@ -58,7 +58,7 @@ def get_svc_end_point(name: str) -> str:
         raise ValueError(f"endpoint_name {name} should be a non-empty string.")
     index = (ord(name[-1]) - 1) % 3
     logger.info(f"SVC request get_api_end_point: {name} -> {endpoints_portmap[index]}")
-    return f"http://localhost:7856/svc_file"
+    #return f"http://localhost:7856/svc_file"
     return f"http://ttd-worker:{endpoints_portmap[index]}/svc_file"
 
 
