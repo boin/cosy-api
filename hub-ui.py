@@ -2,6 +2,7 @@
 
 import gradio as gr
 import random
+import os
 
 from tools.hub_client import request_svc, request_infer
 
@@ -12,6 +13,12 @@ def generate_seed():
         "__type__": "update",
         "value": seed
     }
+
+
+def set_download_url(file:dict):
+    os.rename(file.get("path"), f"{file.get('path')}.wav")
+    return f"{file.get('url')}.wav"
+
 
 with gr.Blocks() as hub:
 
@@ -26,14 +33,18 @@ with gr.Blocks() as hub:
             ref_file = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz')
             asr_text = gr.Textbox(label="输入ASR文本", lines=1, value="")
             tts_text = gr.Textbox(label="输入合成文本", lines=1, value="")
-
-            generate_button = gr.Button("生成音频", variant="primary")
-            cosy_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False, format="wav")
+            with gr.Row():
+                generate_button = gr.Button("生成音频", variant="primary")
+                download_button = gr.DownloadButton(label="\U0001F4BE 下载", scale=0)
+            cosy_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False)
             seed_button.click(generate_seed, outputs=[seed]).then(
                 request_infer, inputs=[tts_text, seed, ref_file, asr_text, speed], outputs=[cosy_audio]
             )
             generate_button.click(
                 request_infer, inputs=[tts_text, seed, ref_file, asr_text, speed], outputs=[cosy_audio]
+            )
+            cosy_audio.change(
+                set_download_url, cosy_audio, download_button, preprocess=False
             )
             from tools.funasr import auto_asr
             ref_file.change(auto_asr, ref_file, asr_text)
@@ -43,14 +54,21 @@ with gr.Blocks() as hub:
 
             with gr.Row():
                 src_audio = gr.Audio(sources='upload', type='filepath', label='选择输入音频文件，注意采样率不低于16khz')
+
             with gr.Row():
                 ref_audio = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz')
             steps = gr.Number(value=50, label="扩散步数", minimum=1, maximum=100, step=1)
 
-            generate_button = gr.Button("生成音频", variant="primary")
+            with gr.Row():
+                generate_button = gr.Button("生成音频", variant="primary")
+                svc_download_button = gr.DownloadButton(label="\U0001F4BE 下载", scale=0)
+
             svc_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False, format="wav")
             generate_button.click(
                 request_svc, inputs=[src_audio, ref_audio, steps], outputs=[svc_audio]
+            )
+            svc_audio.change(
+                set_download_url, svc_audio, svc_download_button, preprocess=False
             )
 
 hub.launch(server_name='0.0.0.0', server_port=5650)
