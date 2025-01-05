@@ -33,7 +33,8 @@ def request_infer(
         "ref_file": ref_file,
         "asr": asr,
         "rseed": rseed,
-        "speed": speed
+        "speed": speed,
+        "post_process": False
     }
 
     try:

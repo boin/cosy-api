@@ -28,7 +28,7 @@ with gr.Blocks() as hub:
             tts_text = gr.Textbox(label="输入合成文本", lines=1, value="")
 
             generate_button = gr.Button("生成音频", variant="primary")
-            cosy_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False)
+            cosy_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False, format="wav")
             seed_button.click(generate_seed, outputs=[seed]).then(
                 request_infer, inputs=[tts_text, seed, ref_file, asr_text, speed], outputs=[cosy_audio]
             )
@@ -48,7 +48,7 @@ with gr.Blocks() as hub:
             steps = gr.Number(value=50, label="扩散步数", minimum=1, maximum=100, step=1)
 
             generate_button = gr.Button("生成音频", variant="primary")
-            svc_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False)
+            svc_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False, format="wav")
             generate_button.click(
                 request_svc, inputs=[src_audio, ref_audio, steps], outputs=[svc_audio]
             )

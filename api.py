@@ -77,7 +77,7 @@ def normalize_sound(audio, sr):
         return audio
 
 
-def generate_data(model_output):
+def generate_data(model_output, post_process=True):
     """
     Generate a WAV audio file from model output with loudness normalization.
     Args:
@@ -89,7 +89,8 @@ def generate_data(model_output):
     for i in model_output:
         tts_speeches.append(i["tts_speech"])
     tts_audio = torch.concat(tts_speeches, dim=1).numpy().flatten()
-    tts_audio = normalize_sound(tts_audio, sr=cosyvoice.sample_rate)
+    if post_process:
+        tts_audio = normalize_sound(tts_audio, sr=cosyvoice.sample_rate)
     # Convert back to int16
     int16_audio = (tts_audio * (2**15)).astype(np.int16)
     # Write to WAV file in memory
@@ -137,6 +138,7 @@ async def zero_shot(
     asr: str = Form(),
     rseed: str = Form(),
     speed: str = Form(),
+    post_process: bool = Form("True"),
 ):
     if rseed != "":
         seed = int(rseed)
@@ -159,10 +161,10 @@ async def zero_shot(
         
         # 处理音频文件
         prompt_speech_16k = load_wav(temp_file_path, 16000)
-        model_output = cosyvoice.inference_zero_shot(text, asr, prompt_speech_16k, speed)
+        model_output = cosyvoice.inference_zero_shot(text, asr, prompt_speech_16k, speed=speed)
         
         return StreamingResponse(
-            generate_data(model_output),
+            generate_data(model_output, post_process),
             media_type="audio/wav",
             headers={"Content-Disposition": "attachment; filename=output.wav"},
         )
