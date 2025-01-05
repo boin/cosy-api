@@ -24,8 +24,6 @@ def request_infer(
     asr: str,
     speed: str = "1",
 ) -> (int, str):
-    if not (url := get_infer_end_point(asr)):
-        return 1, f"endpoint_name {asr} not valid."
 
     # 请求的 payload
     request_payload = {
@@ -38,6 +36,8 @@ def request_infer(
     }
 
     try:
+        url = get_infer_end_point(asr)
+
         logger.info(f"requesting zero shot infer with payload: {request_payload} to {url}")
         # 2分钟内没有返回内容则视为失败，GPU Hang 或者 GPU Fail
         files = [("ref_file", ("ref_file", open(ref_file, "rb"), "application/octet-stream"))]
@@ -68,8 +68,6 @@ def request_svc(
     ref_file: str,
     steps: int = 50,
 ) -> (int, str):
-    if not (url := get_svc_end_point(md5(f"{src_file}-{ref_file}".encode()).hexdigest())):
-        return 1, f"endpoint_name not valid."
 
     # 请求的 payload
     request_payload = {
@@ -82,6 +80,8 @@ def request_svc(
     ]
 
     try:
+        url = get_svc_end_point(md5(f"{src_file}-{ref_file}".encode()).hexdigest())
+
         logger.info(
             f"requesting svc with payload: {request_payload} files: {[src_file, ref_file]} to {url}"
         )
