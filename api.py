@@ -30,10 +30,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
 from cosyvoice.cli.cosyvoice import CosyVoice, CosyVoice2
-from cosyvoice.utils.file_utils import load_wav
+from cosyvoice.utils.file_utils import load_wav, logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("multipart").setLevel(logging.ERROR)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(ROOT_DIR)
