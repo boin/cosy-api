@@ -27,7 +27,7 @@ import torch
 import uvicorn
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 
 from cosyvoice.cli.cosyvoice import CosyVoice, CosyVoice2
 from cosyvoice.utils.file_utils import load_wav
@@ -50,9 +50,11 @@ app.add_middleware(
 )
 
 
-def get_model_info(actor_uuid, voice_uuid) -> (bytes, str):
+def get_model_info(actor_uuid: str, voice_uuid: str) -> (bytes | None, str | None):
     model_root = "{}/data/links".format(ROOT_DIR)
-    prompt_wav = Path(model_root) / actor_uuid / "train" / f"{voice_uuid}.wav"
+    prompt_wav: Path = Path(model_root) / actor_uuid / "train" / f"{voice_uuid}.wav"
+    if not prompt_wav.exists():
+        raise FileNotFoundError(f"Prompt wav {prompt_wav} not found")
     return prompt_wav, voice_uuid.split("_")[-1]
 
 
@@ -119,16 +121,20 @@ async def inference(
         np.random.seed(seed)
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
+    try:
+        prompt_wav, prompt_text = get_model_info(actor_uuid, voice_uuid)
+        prompt_speech_16k = load_wav(prompt_wav, 16000)
+        model_output = cosyvoice.inference_zero_shot(text, prompt_text, prompt_speech_16k)
 
-    prompt_wav, prompt_text = get_model_info(actor_uuid, voice_uuid)
-    prompt_speech_16k = load_wav(prompt_wav, 16000)
-
-    model_output = cosyvoice.inference_zero_shot(text, prompt_text, prompt_speech_16k)
-    return StreamingResponse(
-        generate_data(model_output),
-        media_type="audio/wav",
-        headers={"Content-Disposition": "attachment; filename=output.wav"},
-    )
+        return StreamingResponse(
+            generate_data(model_output),
+            media_type="audio/wav",
+            headers={"Content-Disposition": "attachment; filename=output.wav"},
+        )
+    except FileNotFoundError as e:
+        return JSONResponse(status_code=404, content={"detail": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
 @app.post("/zero_shot_infer")
