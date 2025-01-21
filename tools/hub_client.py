@@ -22,7 +22,9 @@ def request_infer(
     rseed: str,
     ref_file: str,
     asr: str,
+    instruct: str,
     speed: str = "1",
+    mode: str = "0",
 ) -> (int, str):
 
     # 请求的 payload
@@ -30,9 +32,11 @@ def request_infer(
         "text": text,
         "ref_file": ref_file,
         "asr": asr,
+        "instruct": instruct,
         "rseed": rseed,
         "speed": speed,
-        "post_process": False
+        "post_process": False,
+        "mode": mode
     }
 
     try:

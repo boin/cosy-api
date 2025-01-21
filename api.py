@@ -139,9 +139,11 @@ async def inference(
 
 @app.post("/zero_shot_infer")
 async def zero_shot(
+    mode: str = Form("0"),
     text: str = Form(),
     ref_file: UploadFile = File(...),
-    asr: str = Form(),
+    asr: str = Form(""),
+    instruct: str = Form(""),
     rseed: str = Form(),
     speed: str = Form(),
     post_process: bool = Form("True"),
@@ -167,8 +169,19 @@ async def zero_shot(
         
         # 处理音频文件
         prompt_speech_16k = load_wav(temp_file_path, 16000)
-        model_output = cosyvoice.inference_zero_shot(text, asr, prompt_speech_16k, speed=speed)
-        
+        match mode:
+            case "0":
+                logging.info(f"Zero-shot with asr {asr}")
+                model_output = cosyvoice.inference_zero_shot(text, asr, prompt_speech_16k, speed=speed)
+            case "1":
+                logging.info(f"Cross-lingual mode")
+                model_output = cosyvoice.inference_cross_lingual(text, prompt_speech_16k, speed=speed)
+            case "2":
+                logging.info(f"Instruct2 with instruct {instruct}")
+                model_output = cosyvoice.inference_instruct2(text, instruct, prompt_speech_16k, speed=speed)
+            case _:
+                raise ValueError(f"mode {mode} (type {type(mode)}) is not supported")
+
         return StreamingResponse(
             generate_data(model_output, post_process),
             media_type="audio/wav",
@@ -187,5 +200,5 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
     #cosyvoice = CosyVoice('data/pretrained_models/CosyVoice-300M-25Hz', load_jit=True, load_onnx=False)
-    cosyvoice = CosyVoice2('data/pretrained_models/CosyVoice2-0.5B', load_jit=True, load_onnx=False, load_trt=False)
+    cosyvoice = CosyVoice2('data/pretrained_models/CosyVoice2-0.5B')
     uvicorn.run(app, host="0.0.0.0", port=args.port)
