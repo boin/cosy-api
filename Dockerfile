@@ -1,7 +1,7 @@
-FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-devel
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -y && apt-get -y install git curl ffmpeg wget vim locales apt-utils libaio-dev
+RUN apt-get update -y && apt-get -y install git curl ffmpeg wget vim locales apt-utils libaio-dev python3 python3-pip
 RUN locale-gen en_US en_US.UTF-8
 
 #mount requirements.txt for best cache result
