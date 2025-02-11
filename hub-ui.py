@@ -39,7 +39,9 @@ with gr.Blocks() as hub:
 
             ref_file = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz')
             asr_text = gr.Textbox(label="输入ASR文本", lines=1, value="")
-            instruct_text = gr.Textbox(label="输入Instruct文本", lines=1, value="")
+            instruct_text = gr.Text(label="Instruct文本参考", lines=2, value="<strong> </strong> ， <laughter> </laughter>  \n \
+[noise] [breath] [laughter] [cough] [clucking] [accent] [quick_breath] \n \
+[hissing] [sigh] [vocalized-noise] [lipsmack] [mn]")
             tts_text = gr.Textbox(label="输入合成文本", lines=1, value="")
             with gr.Row():
                 generate_button = gr.Button("生成音频", variant="primary")
