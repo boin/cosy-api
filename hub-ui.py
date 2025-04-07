@@ -3,6 +3,9 @@
 import gradio as gr
 import random
 import os
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
 
 from tools.hub_client import request_svc, request_infer
 
