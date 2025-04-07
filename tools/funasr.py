@@ -1,8 +1,11 @@
 import requests
 import sys
+import os
 
 
 def auto_asr(audio_path):
+    if not audio_path or os.path.exists(audio_path) is False:
+        return ""
     res = asr_model(open(audio_path, "rb"))
     return res["result"][0]["clean_text"]
 

@@ -12,7 +12,7 @@ def get_infer_end_point(name: str) -> str:
         raise ValueError(f"endpoint_name {name} should be a non-empty string.")
     endpoints_portmap = [360, 361, 362]
     index = (ord(name[-1]) - 1) % 3
-    logger.info(f"SVC request get_api_end_point: {name} -> {endpoints_portmap[index]}")
+    logger.info(f"Infer request get_api_end_point: {name} -> {endpoints_portmap[index]}")
     #return f"http://localhost:8000/zero_shot_infer"
     return f"http://ttd-worker:{endpoints_portmap[index]}/zero_shot_infer"
 
