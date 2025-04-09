@@ -163,6 +163,7 @@ with gr.Blocks(title="八百鹦", css=custom_css) as hub:
                     inputs=[download_button],
                     outputs=[rvc_src_audio]
                 )
+                rvc_refresh_button = gr.Button("\U000027F3", variant="secondary", min_width=50, scale=0)
 
             # RVC模型选择
             with gr.Row():
@@ -182,7 +183,6 @@ with gr.Blocks(title="八百鹦", css=custom_css) as hub:
 
 
             with gr.Row():
-                rvc_refresh_button = gr.Button("刷新RVC音色库", variant="secondary")
                 rvc_generate_button = gr.Button("生成RVC输出", variant="primary")
                 rvc_download_button = gr.DownloadButton(label="\U0001F4BE 下载", scale=0)
 
