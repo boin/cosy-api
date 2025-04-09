@@ -151,22 +151,26 @@ with gr.Blocks(title="八百鹦", css=custom_css) as hub:
             with gr.Row():
                 # RVC输入源
                 rvc_src_audio = gr.Audio(sources='upload', type='filepath', label='选择输入音频文件，注意采样率不低于16khz', scale=7, interactive=True)
-            gr.Button("导入推理结果", variant="secondary",scale=3).click(
-                lambda x: x,
-                inputs=[download_button],
-                outputs=[rvc_src_audio]
-            )
+            
+            with gr.Row():
+                gr.Button("导入源参考", variant="secondary").click(
+                    lambda x: x,
+                    inputs=[ref_file],
+                    outputs=[rvc_src_audio]
+                )
+                gr.Button("导入推理结果", variant="secondary").click(
+                    lambda x: x,
+                    inputs=[download_button],
+                    outputs=[rvc_src_audio]
+                )
 
             # RVC模型选择
-            rvc_refresh_button = gr.Button("刷新RVC音色库", variant="secondary")
             with gr.Row():
                 rvc_models = gr.Dropdown(label="音色模型", choices=[], interactive=True)
+                # 音高偏移设置
+                pitch_shift = gr.Slider(label="变调 音高偏移（半音数）", minimum=-12, maximum=12, value=0, step=1, interactive=True)
                 rvc_indices = gr.Dropdown(label="特征索引", choices=[], interactive=True)
 
-                rvc_refresh_button.click(
-                    handle_init_rvc_resources,
-                    outputs=[rvc_models, rvc_indices, indices_state]
-                )
                 rvc_models.change(
                     find_matching_index,
                     inputs=[rvc_models, indices_state],
@@ -178,8 +182,14 @@ with gr.Blocks(title="八百鹦", css=custom_css) as hub:
 
 
             with gr.Row():
+                rvc_refresh_button = gr.Button("刷新RVC音色库", variant="secondary")
                 rvc_generate_button = gr.Button("生成RVC输出", variant="primary")
                 rvc_download_button = gr.DownloadButton(label="\U0001F4BE 下载", scale=0)
+
+                rvc_refresh_button.click(
+                    handle_init_rvc_resources,
+                    outputs=[rvc_models, rvc_indices, indices_state]
+                )
 
             with gr.Row():
                 # RVC生成的音频
@@ -188,20 +198,19 @@ with gr.Blocks(title="八百鹦", css=custom_css) as hub:
             
             #RVC 设置
             with gr.Row():
-                # 音高偏移设置
-                pitch_shift = gr.Slider(label="变调 音高偏移（半音数）", minimum=-12, maximum=12, value=0, step=1, interactive=True)
-                # 响度标准化
-                loudnorm = gr.Slider(label="loudnorm到指定的LUFS（0为不调整）", minimum=-40, maximum=-10, value=-26, step=1, interactive=True)
-                # 重采样采样率
-                resample_sr = gr.Slider(label="重采样采样率", minimum=0, maximum=48000, value=48000, step=100, interactive=True)
-                # RMS混合率
-                rms_mix_rate = gr.Slider(label="输入源音量包络替换输出音量包络融合比例，越靠近1越使用输出包络", minimum=0, maximum=1, value=1, step=0.01, interactive=True)
-                # 保护清辅音和咽音
-                protect_option = gr.Slider(label="保护清辅音和咽音，防止出现artifact，启用会牺牲转换度", minimum=0, maximum=0.5, value=0.33, step=0.01, interactive=True)
-                # 滤波器半径
-                filter_radius = gr.Slider(label=">=3则使用对harvest音高识别的结果使用中值滤波，数值为滤波半径，使用可以削弱哑音", minimum=0, maximum=7, value=3, step=1, interactive=True)
-                # 检索特征占比
-                index_rate = gr.Slider(label="检索特征占比", minimum=0, maximum=1, value=1, step=0.01, interactive=True)
+                with gr.Accordion("RVC设置", open=False):
+                    # 响度标准化
+                    loudnorm = gr.Slider(label="loudnorm到指定的LUFS（0为不调整）", minimum=-40, maximum=-10, value=-26, step=1, interactive=True)
+                    # 重采样采样率
+                    resample_sr = gr.Slider(label="重采样采样率", minimum=0, maximum=48000, value=48000, step=100, interactive=True)
+                    # RMS混合率
+                    rms_mix_rate = gr.Slider(label="输入源音量包络替换输出音量包络融合比例，越靠近1越使用输出包络", minimum=0, maximum=1, value=1, step=0.01, interactive=True)
+                    # 保护清辅音和咽音
+                    protect_option = gr.Slider(label="保护清辅音和咽音，防止出现artifact，启用会牺牲转换度", minimum=0, maximum=0.5, value=0.33, step=0.01, interactive=True)
+                    # 滤波器半径
+                    filter_radius = gr.Slider(label=">=3则使用对harvest音高识别的结果使用中值滤波，数值为滤波半径，使用可以削弱哑音", minimum=0, maximum=7, value=3, step=1, interactive=True)
+                    # 检索特征占比
+                    index_rate = gr.Slider(label="检索特征占比", minimum=0, maximum=1, value=1, step=0.01, interactive=True)
 
             rvc_generate_button.click(
                 lambda src_audio, pitch_shift, indices, index_rate, filter_radius, resample_sr, rms_mix_rate, protect, loudnorm: convert_audio(
