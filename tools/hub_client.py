@@ -71,11 +71,19 @@ def request_svc(
     src_file: str,
     ref_file: str,
     steps: int = 50,
+    f0_adjust: bool = False,
+    pitch_shift: int = 0,
+    length_adjust: float = 1.0,
 ) -> (int, str):
 
     # 请求的 payload
     request_payload = {
         "steps": steps,
+        "inference_cfg_rate": "0.7",
+        "f0_conditioned": f0_adjust,
+        "auto_f0_adjust": not f0_adjust,
+        "pitch_shift": pitch_shift,
+        "length_adjust": length_adjust,
     }
 
     files = [
