@@ -51,11 +51,33 @@ def infer(
         return None
 
 
-with gr.Blocks(title="八百鹦") as hub:
+# 自定义 CSS 样式，使界面全宽显示
+custom_css = """
+.gradio-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+.container {
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+"""
+
+with gr.Blocks(title="八百鹦", css=custom_css) as hub:
     indices_state = gr.State([])
     with gr.Row():
         with gr.Column():
             gr.Markdown("## 鹦鹉/八哥推理")
+
+            ref_file = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz')
+            asr_text = gr.Textbox(label="输入ASR文本", lines=1, value="")
+            instruct_text = gr.Text(label="Instruct文本参考", lines=2, value="<strong> </strong> ， <laughter> </laughter>  \n \
+[noise] [breath] [laughter] [cough] [clucking] [accent] [quick_breath] \n \
+[hissing] [sigh] [vocalized-noise] [lipsmack] [mn]")
+            tts_text = gr.Textbox(label="输入合成文本", lines=1, value="")
             with gr.Row():
                 model = gr.Radio([("鹦鹉", "cosy"), ("八哥", "spark")], label="选择模型", value="cosy", scale=3)
                 mode = gr.JSON(0, visible=False) # 默认Zero-Shot
@@ -65,17 +87,12 @@ with gr.Blocks(title="八百鹦") as hub:
                 # )                
                 speed = gr.Number(value=1, label="速度调节", minimum=0.5, maximum=2.0, step=0.1, scale=3, min_width=80)
                 seed = gr.Number(value=0, label="随机推理种子", scale=3, min_width=80)
-                seed_button = gr.Button(value="\U0001F3B2", scale=1, min_width=40)
 
-            ref_file = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz')
-            asr_text = gr.Textbox(label="输入ASR文本", lines=1, value="")
-            instruct_text = gr.Text(label="Instruct文本参考", lines=2, value="<strong> </strong> ， <laughter> </laughter>  \n \
-[noise] [breath] [laughter] [cough] [clucking] [accent] [quick_breath] \n \
-[hissing] [sigh] [vocalized-noise] [lipsmack] [mn]")
-            tts_text = gr.Textbox(label="输入合成文本", lines=1, value="")
             with gr.Row():
                 generate_button = gr.Button("生成音频", variant="primary")
+                seed_button = gr.Button(value="\U0001F3B2", scale=1, min_width=40)
                 download_button = gr.DownloadButton(label="\U0001F4BE 下载", scale=0)
+                
             cosy_audio = gr.Audio(label="合成后的语音", autoplay=True, streaming=False, interactive=False, format="wav", show_download_button=False)
             seed_button.click(generate_seed, outputs=[seed]).then(
                 infer, inputs=[tts_text, seed, ref_file, asr_text, instruct_text, speed, mode, model], outputs=[cosy_audio]
@@ -94,15 +111,21 @@ with gr.Blocks(title="八百鹦") as hub:
 
             with gr.Row():
                 src_audio = gr.Audio(sources='upload', type='filepath', label='选择输入音频文件，注意采样率不低于16khz',scale=7)
-                gr.Button("导入推理结果", variant="secondary",scale=3).click(
-                    lambda x: x,
-                    inputs=[download_button],
-                    outputs=[src_audio]
-                )
+            gr.Button("导入推理结果", variant="secondary",scale=3).click(
+                lambda x: x,
+                inputs=[download_button],
+                outputs=[src_audio]
+            )
 
             with gr.Row():
-                ref_audio = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz',scale=7)
-                svc_load_rvc_audio_button = gr.Button("导入RVC结果", variant="secondary",scale=3)
+                ref_audio = gr.Audio(sources='upload', type='filepath', label='选择参考音频文件，注意采样率不低于16khz')
+            with gr.Row():
+                gr.Button("导入源参考", variant="secondary").click(
+                    lambda x: x,
+                    inputs=[ref_file],
+                    outputs=[ref_audio]
+                )
+                svc_load_rvc_audio_button = gr.Button("导入RVC结果", variant="secondary")
 
             with gr.Row():
                 f0_adjust = gr.Checkbox(label="手动F0调整", value=False, scale=2, min_width=80)
@@ -125,10 +148,18 @@ with gr.Blocks(title="八百鹦") as hub:
         with gr.Column():
             gr.Markdown("## RVC")
 
-            # RVC模型选择
             with gr.Row():
-                # 刷新按钮
-                rvc_refresh_button = gr.Button("刷新RVC音色库", variant="secondary")
+                # RVC输入源
+                rvc_src_audio = gr.Audio(sources='upload', type='filepath', label='选择输入音频文件，注意采样率不低于16khz', scale=7, interactive=True)
+            gr.Button("导入推理结果", variant="secondary",scale=3).click(
+                lambda x: x,
+                inputs=[download_button],
+                outputs=[rvc_src_audio]
+            )
+
+            # RVC模型选择
+            rvc_refresh_button = gr.Button("刷新RVC音色库", variant="secondary")
+            with gr.Row():
                 rvc_models = gr.Dropdown(label="音色模型", choices=[], interactive=True)
                 rvc_indices = gr.Dropdown(label="特征索引", choices=[], interactive=True)
 
@@ -145,14 +176,6 @@ with gr.Blocks(title="八百鹦") as hub:
                     inputs=[rvc_models],
                 )
 
-            with gr.Row():
-                # RVC输入源
-                rvc_src_audio = gr.Audio(sources='upload', type='filepath', label='选择输入音频文件，注意采样率不低于16khz', scale=7, interactive=True)
-                gr.Button("导入推理结果", variant="secondary",scale=3).click(
-                    lambda x: x,
-                    inputs=[download_button],
-                    outputs=[rvc_src_audio]
-                )
 
             with gr.Row():
                 rvc_generate_button = gr.Button("生成RVC输出", variant="primary")
