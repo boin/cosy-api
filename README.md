@@ -260,5 +260,16 @@ You can also scan the QR code to join our official Dingding chat group.
 }
 ```
 
+## Ecosystem
+
+CosyVoice is part of the **FunAudioLLM** family — a complete speech AI toolkit:
+
+| Project | Description | Stars |
+|---------|-------------|-------|
+| [FunASR](https://github.com/modelscope/FunASR) | Industrial speech recognition — 50+ languages, speaker diarization, streaming | [![](https://img.shields.io/github/stars/modelscope/FunASR?style=social)](https://github.com/modelscope/FunASR) |
+| [Fun-ASR-Nano](https://github.com/FunAudioLLM/Fun-ASR) | End-to-end LLM-based ASR — 31 languages, hotwords, vLLM streaming | [![](https://img.shields.io/github/stars/FunAudioLLM/Fun-ASR?style=social)](https://github.com/FunAudioLLM/Fun-ASR) |
+| [SenseVoice](https://github.com/FunAudioLLM/SenseVoice) | Ultra-fast ASR + emotion + audio event detection | [![](https://img.shields.io/github/stars/FunAudioLLM/SenseVoice?style=social)](https://github.com/FunAudioLLM/SenseVoice) |
+| [FunClip](https://github.com/modelscope/FunClip) | AI video clipping powered by speech recognition | [![](https://img.shields.io/github/stars/modelscope/FunClip?style=social)](https://github.com/modelscope/FunClip) |
+
 ## Disclaimer
 The content provided above is for academic purposes only and is intended to demonstrate technical capabilities. Some examples are sourced from the internet. If any content infringes on your rights, please contact us to request its removal.
